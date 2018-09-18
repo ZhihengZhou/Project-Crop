@@ -13,7 +13,7 @@ max_elements = 20000
 
 x = []
 
-os.chdir("./UIdata/Masked/") 
+os.chdir("./UIdata/Masked-Crop/") 
 paths = os.listdir('./')
 paths = [d for d in paths if not os.path.isfile(d)]
 
@@ -48,22 +48,22 @@ x_test = x[p:]
 
 os.chdir("../") 
 
-if not os.path.exists('./npy'):
-    os.mkdir('./npy')
+if not os.path.exists('./npy-Crop'):
+    os.mkdir('./npy-Crop')
     
 if len(x_test) > max_elements:
     for count in range(int(len(x_test)/max_elements)):
-        np.save('./npy/x_test_' + str(count) + '.npy', x_test[count*max_elements : (count+1)*max_elements])
-    np.save('./npy/x_test_' + str(count+1) + '.npy', x_train[(count+1)*max_elements :])
+        np.save('./npy-Crop/x_test_' + str(count) + '.npy', x_test[count*max_elements : (count+1)*max_elements])
+    np.save('./npy-Crop/x_test_' + str(count+1) + '.npy', x_train[(count+1)*max_elements :])
 else:
-    np.save('./npy/x_test.npy', x_test)
+    np.save('./npy-Crop/x_test.npy', x_test)
 
 if len(x_train) > max_elements:
     for count in range(int(len(x_train)/max_elements)):
-        np.save('./npy/x_train_' + str(count) + '.npy', x_train[count*max_elements : (count+1)*max_elements])
-    np.save('./npy/x_train_' + str(count+1) + '.npy', x_train[(count+1)*max_elements :])
+        np.save('./npy-Crop/x_train_' + str(count) + '.npy', x_train[count*max_elements : (count+1)*max_elements])
+    np.save('./npy-Crop/x_train_' + str(count+1) + '.npy', x_train[(count+1)*max_elements :])
 else:
-    np.save('./npy/x_train.npy', x_train)
+    np.save('./npy-Crop/x_train.npy', x_train)
 
 pbar.finish()
 

@@ -134,12 +134,12 @@ os.chdir("./UIdata")
 filenames = os.listdir("./")
 dirs = [d for d in filenames if "-output" in d]
 
-output_dir = "./Masked/"
+output_dir = "./Masked-Crop/"
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
     
 # Progressbar
-Max = 20000
+Max = 100000
 pbar = progressbar.ProgressBar(maxval = Max).start()
 
 # Parameters
@@ -199,7 +199,7 @@ for app_dir in dirs:
                 image_count += 1
                 masked_count += count
                 
-            pbar.update(image_count)
+            pbar.update(masked_count)
             if image_count >= Max:
                 break_flag = True
                 break
