@@ -61,7 +61,8 @@ def mask_and_save_image(box):
             im.save(save_dir +  img_names[0] + "-mask_" + str(count) + "-" + str(box) + "." + img_names[1])
             count += 1
         except Exception:
-            print(save_dir + img_names)
+            #print(save_dir + img_names)
+            pass
     
 # Find node recursively
 def find_all_element_by_attribute(node, element_name, attribute, find):
