@@ -77,6 +77,10 @@ sess.run(init_op)
 # Load train and test data.
 train_data, test_data = load()
 
+print(len(train_data))
+train_data = [x for x in train_data if len(x[1]) == 4]
+print(len(train_data))
+
 step_num = int(len(train_data) / BATCH_SIZE)
 
 # Load model
