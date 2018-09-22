@@ -16,6 +16,9 @@ LOCAL_SIZE = 64
 BATCH_SIZE = 16
 
 test_data, _= load('../../Data/UIdata/npy/')
+print(len(test_data))
+test_data = [x for x in test_data if len(x[1]) == 4]
+print(len(test_data))
 
 def test():
     
