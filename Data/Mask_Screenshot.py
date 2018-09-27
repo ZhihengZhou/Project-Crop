@@ -191,7 +191,6 @@ for app_dir in pbar(dirs):
     files_names = os.listdir(dir_name)
     imgs = [d for d in files_names if "png" in d]
     
-    print(app_name)
     for i in imgs:
         
         xml_name = [d for d in files_names if d == i.split(".")[0] + ".xml"]
