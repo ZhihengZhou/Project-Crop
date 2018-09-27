@@ -6,6 +6,7 @@ import re
 import hashlib
 from skimage import transform
 import progressbar
+import difflib
     
 def mask_and_save_image(box):
     """
@@ -33,32 +34,37 @@ def mask_and_save_image(box):
             mid_y = (box[1] + box[3])/2
         
             x1 = int(mid_x - global_window/2)
-            if x1 < 0:
-                x1 = 0
-            elif x1 > image_weight - global_window:
-                x1 = image_weight - global_window
+            if x1 < image_width_min:
+                x1 = image_width_min
+            elif x1 > image_width - global_window:
+                x1 = image_width - global_window
             
             box[0] = box[0] - x1
             box[2] = box[2] - x1
         
             y1 = int(mid_y - global_window/2)
-            if y1 < 0:
-                y1 = 0
+            if y1 < image_height_min:
+                y1 = image_height_min
             elif y1 > image_height - global_window:
                 y1 = image_height - global_window
             
             box[1] = box[1] - y1
             box[3] = box[3] - y1
             
-            im = im.crop((x1, y1, x1 + global_window, y1 + global_window))
-            
-            mask = Image.new("RGBA",(width,height),(127,127,127))
-            # im.paste(mask,box)
+            if box[1] < 0:
+                return
             
             if not os.path.exists(save_dir):
                 os.mkdir(save_dir)
             
+            im = im.crop((x1, y1, x1 + global_window, y1 + global_window))
+            
+            mask = Image.new("RGBA",(width,height),(127,127,127))
             im.save(save_dir +  img_names[0] + "-mask_" + str(count) + "-" + str(box) + "." + img_names[1])
+            
+            im.paste(mask,box)
+            #im.save(save_dir +  img_names[0] + "-origin_" + str(count) + "-" + str(box) + "." + img_names[1])
+            
             count += 1
         except Exception:
             #print(save_dir + img_names)
@@ -130,6 +136,22 @@ def delete_attributes_by_name(object_string, keep_list):
     # print(object_string)
     return object_string
 
+def get_attributes(f):
+    
+    class_list = []
+    while True:
+        data = f.readline()
+        
+        class_type = re.findall(r'class=".*?"', data)
+        if len(class_type) > 0:
+            class_type = re.sub("class=", "", class_type[0])
+            class_type = re.sub('\"', "", class_type)
+            class_type = re.sub("android.", "", class_type)
+            class_list.append(class_type)
+        if not data:
+            break
+    return ' '.join(class_list)
+
 # Main
 os.chdir("./UIdata") 
 filenames = os.listdir("./")
@@ -141,18 +163,23 @@ if not os.path.exists(output_dir):
     
 # Progressbar
 Max = 100000
-pbar = progressbar.ProgressBar(maxval = Max).start()
+# pbar = progressbar.ProgressBar(maxval = Max).start()
+pbar = progressbar.ProgressBar()
 
 # Parameters
 break_flag = False
 image_count = 0
 masked_count = 0
 local_window = 64
-global_window = 128
-image_weight = 800
+global_window = 256
+image_width_min = 0
+image_height_min = 33
+image_width = 800
 image_height = 1216
 
-for app_dir in dirs:
+visited_screenshot = []
+
+for app_dir in pbar(dirs):
     
     if break_flag:
         break
@@ -160,14 +187,11 @@ for app_dir in dirs:
     app_name = app_dir.split("-")[0]
     dir_name = os.path.join(app_dir, "stoat_fsm_output", "ui")
     save_dir = output_dir + app_name + "/"
-
-    
-    visited_screenshot = []
-    visited_screenshot_md5 = []
     
     files_names = os.listdir(dir_name)
     imgs = [d for d in files_names if "png" in d]
     
+    print(app_name)
     for i in imgs:
         
         xml_name = [d for d in files_names if d == i.split(".")[0] + ".xml"]
@@ -181,14 +205,33 @@ for app_dir in dirs:
             if root.attrib['rotation'] != '0':
                 continue
             
+            ### MD5 version
+            # Check duplicate screenshot
+#             with open(dir_name + "/" + xml_name[0]) as f:
+#                 file_md5 = get_file_md5(f)
+#                 if file_md5 in visited_screenshot_md5:
+#                     continue
+#                 else:
+#                     visited_screenshot.append((file_md5, app_dir, i))
+#                     visited_screenshot_md5.append(file_md5)
+
+            ### String similarity version
+            visited_flag = False
             # Check duplicate screenshot
             with open(dir_name + "/" + xml_name[0]) as f:
-                file_md5 = get_file_md5(f)
-                if file_md5 in visited_screenshot_md5:
-                    continue
-                else:
-                    visited_screenshot.append((file_md5, app_dir, i))
-                    visited_screenshot_md5.append(file_md5)
+                class_str = get_attributes(f)
+                for visited in visited_screenshot:
+                    seq = difflib.SequenceMatcher(None, class_str, visited[0])
+                    ratio = seq.ratio()
+                    if ratio > 0.95:
+                        
+                        visited_flag = True
+                        break
+
+            if visited_flag:
+                continue
+            
+            visited_screenshot.append((class_str, app_dir, i))
             
             # Start to mask screenshot
             count = 0
@@ -197,12 +240,17 @@ for app_dir in dirs:
             
             # Save original image
             if count > 0:
+                im = Image.open(dir_name + "/" + img_name)
+                im.save(save_dir + img_name)
                 image_count += 1
                 masked_count += count
                 
-            pbar.update(masked_count)
             if image_count >= Max:
+                pbar.update(Max)
                 break_flag = True
                 break
+                
+            pbar.update(masked_count)
+            
 
 print("Have masked " + str(image_count) + " screenshots, gets " + str(masked_count) + " masked screenshots.")
