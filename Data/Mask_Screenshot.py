@@ -261,12 +261,12 @@ for app_dir in pbar(dirs):
                 image_count += 1
                 masked_count += count
                 
-            if image_count >= Max:
-                pbar.update(Max)
-                break_flag = True
-                break
+#             if image_count >= Max:
+#                 pbar.update(Max)
+#                 break_flag = True
+#                 break
                 
-            pbar.update(masked_count)
+            # pbar.update(masked_count)
             
 with open("./button_size.txt", "wb") as fp:   #Pickling
     pickle.dump(Button_list, fp)
