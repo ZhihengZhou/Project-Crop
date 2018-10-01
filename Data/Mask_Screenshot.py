@@ -7,6 +7,7 @@ import hashlib
 from skimage import transform
 import progressbar
 import difflib
+import pickle
     
 def mask_and_save_image(box):
     """
@@ -18,9 +19,11 @@ def mask_and_save_image(box):
     """
     
     global count
+    global Button_list
     
     width = box[2]-box[0]
     height = box[3]-box[1]
+    Button_list.append((width, height))
     
     if width >= 0 and width <= local_window and height >= 0 and width <= local_window:
     
@@ -181,6 +184,7 @@ visited_screenshot = []
 visited_screenshot_md5 = []
 
 last_app_domain = None
+Button_list = []
 
 for app_dir in pbar(dirs):
     
@@ -264,5 +268,9 @@ for app_dir in pbar(dirs):
                 
             pbar.update(masked_count)
             
-
+with open("./button_size.txt", "wb") as fp:   #Pickling
+    pickle.dump(Button_list, fp)
+    
+print(len(Button_list))
+            
 print("Have masked " + str(image_count) + " screenshots, gets " + str(masked_count) + " masked screenshots.")
