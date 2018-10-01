@@ -178,6 +178,9 @@ image_width = 800
 image_height = 1216
 
 visited_screenshot = []
+visited_screenshot_md5 = []
+
+last_app_domain = None
 
 for app_dir in pbar(dirs):
     
@@ -187,6 +190,16 @@ for app_dir in pbar(dirs):
     app_name = app_dir.split("-")[0]
     dir_name = os.path.join(app_dir, "stoat_fsm_output", "ui")
     save_dir = output_dir + app_name + "/"
+    
+    # Check the domain of current and last app.
+    # Only do the remove dupilicate process for the same domain app.
+    current_app_domain = app_name.split(".")[0:2]
+    if current_app_domain != last_app_domain:
+        visited_screenshot = []
+        visited_screenshot_md5 = []
+    else:
+        print(current_app_domain, last_app_domain)
+    last_app_domain = current_app_domain
     
     files_names = os.listdir(dir_name)
     imgs = [d for d in files_names if "png" in d]
@@ -214,7 +227,7 @@ for app_dir in pbar(dirs):
 #                     visited_screenshot.append((file_md5, app_dir, i))
 #                     visited_screenshot_md5.append(file_md5)
 
-            ### String similarity version
+              ### String similarity version
             visited_flag = False
             # Check duplicate screenshot
             with open(dir_name + "/" + xml_name[0]) as f:
