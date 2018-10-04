@@ -4,7 +4,7 @@ import numpy as np
 import tqdm
 import tensorflow as tf
 from layer import *
-from network import *
+from network256 import *
 from load import *
 
 def get_points(bounds):
@@ -44,7 +44,7 @@ def get_points(bounds):
     return np.array(points), np.array(mask)
 
 # Hyperparameters
-IMAGE_SIZE = 128
+IMAGE_SIZE = 256
 LOCAL_SIZE = 64
 LEARNING_RATE = 1e-3
 BATCH_SIZE = 16
@@ -74,6 +74,7 @@ sess.run(init_op)
 
 # Load train and test data.
 train_data, test_data = load()
+test_data = train_data
 
 print(len(train_data))
 train_data = [x for x in train_data if len(x[1]) == 4]
