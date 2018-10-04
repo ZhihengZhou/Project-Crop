@@ -74,7 +74,6 @@ sess.run(init_op)
 
 # Load train and test data.
 train_data, test_data = load()
-test_data = train_data
 
 print(len(train_data))
 train_data = [x for x in train_data if len(x[1]) == 4]
